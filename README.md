@@ -77,8 +77,8 @@
 ### 1. 安装依赖
 
 ```bash
-git clone <your-repo-url>
-cd ego-video-compiler
+git clone https://github.com/Long-Miao-Git/egocentric-data-compiler.git
+cd egocentric-data-compiler
 
 python -m venv .venv
 # Windows
