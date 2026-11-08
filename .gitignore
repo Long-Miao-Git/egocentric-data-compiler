@@ -1,0 +1,32 @@
+# ---- 密钥与本地配置 ----
+.env
+config.local.yaml
+
+# ---- 运行产物 ----
+output/
+output_test/
+cache/
+*.log
+app.log
+
+# ---- 示例视频（体积大，不入库）----
+examples/*.mp4
+examples/*.mov
+examples/*.avi
+
+# ---- 依赖的二进制（首次运行自动生成）----
+bin/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ---- 编辑器 / 系统 ----
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

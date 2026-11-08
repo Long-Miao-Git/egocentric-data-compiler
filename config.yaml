@@ -1,0 +1,62 @@
+# ============================================================================
+# EGO 视频编译工具 配置文件
+#
+# 所有参数都可以被命令行参数覆盖，优先级：命令行 > 环境变量 > 本文件 > 内置默认
+# API 密钥不写在这里，请放到 .env 或环境变量（见 .env.example）
+# ============================================================================
+
+# ---- 接口 ----
+api:
+  # 任何 OpenAI 兼容接口都可以，例如：
+  #   阿里云百炼  https://dashscope.aliyuncs.com/compatible-mode/v1
+  #   OpenAI      https://api.openai.com/v1
+  #   本地 vLLM   http://localhost:8000/v1
+  #   本地 Ollama http://localhost:11434/v1
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+
+# ---- 路径 ----
+paths:
+  # 输出根目录。留空则用 ./output
+  # 产物结构：<output_root>/compiled/*.compiled.json
+  output_root: ""
+
+# ---- 切分（不调用大模型，零成本）----
+sampling:
+  analysis_fps: 5.0           # 运动曲线采样帧率，越高越准但越慢
+  min_peak_ratio: 0.65        # 峰值阈值比例，调小→切得更细，调大→更粗
+  frames_per_seg: 4           # 每个片段抽取的证据帧数（起始/峰时/中点/结束）
+  min_clarity_threshold: 60   # Laplacian 方差阈值，低于此值判为模糊帧并丢弃
+  workers: 4                  # 片段级并行线程数
+  batch_size: 8               # 单次 VLM 调用最多喂几张图
+
+# ---- 视觉语言模型：看帧、描述画面 ----
+vlm:
+  model: qwen3.7-flash        # 换成 qwen2.5-vl-7b / gpt-4o-mini / 本地模型均可
+  max_tokens: 8192            # 输出上限，太低会截断导致 JSON 解析失败
+  temperature: 0.1            # 低温度保证结构化输出稳定
+  vlm_workers: 4              # 帧描述的并发批次数
+
+# ---- 语言模型：融合实体、生成问答、修复 JSON ----
+llm:
+  model: qwen3.8-flash
+  max_tokens: 8192
+  temperature: 0.3            # 生成问答需要一点多样性；JSON 修复固定用 0.1
+  enable_thinking: false      # 若模型支持思考模式且开启了 tool_choice，需关闭
+
+# ---- 问答生成 ----
+vqa:
+  min_items_per_segment: 5    # 每片段最少问答条数
+  max_items_per_segment: 25   # 每片段最多问答条数
+
+# ---- 成本估算（仅用于统计显示，不影响功能）----
+# 单位：元 / 千 token。请按你所用服务的实际价格填写。
+cost:
+  vlm_input_per_1k: 0.0002
+  vlm_output_per_1k: 0.0008
+  llm_input_per_1k: 0.0008
+  llm_output_per_1k: 0.0027
+
+# ---- 输出 ----
+output:
+  save_frames: true           # 保留抽帧图片（设为 false 可省磁盘，但证据帧将无法回溯）
+  save_intermediate: true     # 保留 .segments.json 中间结果
